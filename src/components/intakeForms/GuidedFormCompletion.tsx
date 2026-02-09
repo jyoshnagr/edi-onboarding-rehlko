@@ -214,6 +214,16 @@ export function GuidedFormCompletion({
     }
   };
 
+  const normalizeOptions = (options: any[]) => {
+    if (!options || options.length === 0) return [];
+    return options.map(option => {
+      if (typeof option === 'string') {
+        return { label: option, value: option };
+      }
+      return { label: option.label, value: option.value };
+    });
+  };
+
   const startNextField = () => {
     const nextField = getNextMissingField(template, data, currentFieldId, skippedFields);
 
@@ -228,7 +238,7 @@ export function GuidedFormCompletion({
     setCurrentFieldId(nextField.id);
 
     const quickReplies = nextField.type === 'select' && nextField.options
-      ? nextField.options.slice(0, 4).map((o: { label: any; }) => o.label)
+      ? normalizeOptions(nextField.options).slice(0, 4).map((o) => o.label)
       : undefined;
 
     addAvatarMessage(nextField.avatarPrompt, nextField.id, quickReplies);
@@ -277,7 +287,7 @@ export function GuidedFormCompletion({
             setCurrentFieldId(nextField.id);
 
             const quickReplies = nextField.type === 'select' && nextField.options
-              ? nextField.options.slice(0, 4).map((o: { label: any; }) => o.label)
+              ? normalizeOptions(nextField.options).slice(0, 4).map((o) => o.label)
               : undefined;
 
             addAvatarMessage(nextField.avatarPrompt, nextField.id, quickReplies);
@@ -319,7 +329,8 @@ export function GuidedFormCompletion({
         .find(f => f.id === currentFieldId);
 
       if (field?.type === 'select' && field.options) {
-        const option = field.options.find(o => o.label === reply);
+        const normalizedOptions = normalizeOptions(field.options);
+        const option = normalizedOptions.find(o => o.label === reply);
         if (option) {
           handleFieldChange(currentFieldId, option.value);
         }
@@ -337,7 +348,7 @@ export function GuidedFormCompletion({
       voiceManager.current.stopSpeaking();
 
       const quickReplies = field.type === 'select' && field.options
-        ? field.options.slice(0, 4).map(o => o.label)
+        ? normalizeOptions(field.options).slice(0, 4).map(o => o.label)
         : undefined;
 
       addAvatarMessage(

@@ -241,6 +241,7 @@ export function AdminFormBuilder({ onBack }: AdminFormBuilderProps) {
                         <option value="date">Date</option>
                         <option value="number">Number</option>
                         <option value="select">Select</option>
+                        <option value="multiselect">Multi-Select</option>
                         <option value="textarea">Textarea</option>
                       </select>
                     </div>
@@ -264,6 +265,41 @@ export function AdminFormBuilder({ onBack }: AdminFormBuilderProps) {
                     rows={2}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
                   />
+
+                  {(field.type === 'select' || field.type === 'multiselect') && (
+                    <div className="mt-3">
+                      <label className="block text-xs font-medium text-slate-700 mb-2">
+                        Options (one per line, format: "Label" or "Label|value")
+                      </label>
+                      <textarea
+                        value={
+                          field.options
+                            ? field.options
+                                .map((opt: any) =>
+                                  typeof opt === 'string'
+                                    ? opt
+                                    : `${opt.label}|${opt.value}`
+                                )
+                                .join('\n')
+                            : ''
+                        }
+                        onChange={(e) => {
+                          const lines = e.target.value.split('\n').filter((l) => l.trim());
+                          const options = lines.map((line) => {
+                            const parts = line.split('|');
+                            if (parts.length === 2) {
+                              return { label: parts[0].trim(), value: parts[1].trim() };
+                            }
+                            return parts[0].trim();
+                          });
+                          updateField(section.id, field.id, { options });
+                        }}
+                        placeholder="Option 1&#10;Option 2&#10;Custom Label|custom_value"
+                        rows={4}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm font-mono"
+                      />
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-2 mt-2">
                     <label className="flex items-center gap-2 text-sm">

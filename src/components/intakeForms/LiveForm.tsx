@@ -27,11 +27,20 @@ export function LiveForm({
     return validationErrors.find(e => e.fieldId === fieldId)?.message;
   };
 
+  const normalizeOptions = (options: any[]) => {
+    if (!options || options.length === 0) return [];
+
+    return options.map(option => {
+      if (typeof option === 'string') {
+        return { label: option, value: option };
+      }
+      return { label: option.label, value: option.value };
+    });
+  };
+
   const renderField = (field: any) => {
-    // console.log("Field", field)
-    // console.log()
     const value = data[field.id] || '';
-    const isFilled = value !== '';
+    const isFilled = value !== '' && (Array.isArray(value) ? value.length > 0 : true);
     const isCurrent = currentFieldId === field.id;
     const error = getFieldError(field.id);
 
@@ -62,7 +71,7 @@ export function LiveForm({
             onChange={(e) => onChange(field.id, e.target.value)}
             onClick={() => onFieldClick(field.id)}
             placeholder={field.placeholder}
-            rows={1}
+            rows={3}
             className={baseClasses}
           />
         ) : field.type === 'select' ? (
@@ -73,32 +82,73 @@ export function LiveForm({
             className={baseClasses}
           >
             <option value="">Select...</option>
-            {field.options?.map((option: any) => (
+            {normalizeOptions(field.options).map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
               </option>
             ))}
           </select>
         ) : field.type === 'multiselect' ? (
-          <select
-            multiple
-            value={Array.isArray(value) ? value : []}
-            onChange={(e) => {
-              const selected = Array.from(e.target.selectedOptions).map(o => o.value);
-              onChange(field.id, selected);
-            }}
+          <div className="space-y-2">
+            <div className="text-xs text-slate-600 mb-2">
+              Select multiple options (hold Ctrl/Cmd to select multiple)
+            </div>
+            <div className="space-y-1.5 max-h-48 overflow-y-auto border border-slate-300 rounded-lg p-2">
+              {normalizeOptions(field.options).map((option) => {
+                const isSelected = Array.isArray(value) && value.includes(option.value);
+                return (
+                  <label
+                    key={option.value}
+                    className={`
+                      flex items-center gap-2 p-2 rounded cursor-pointer transition-all
+                      ${isSelected ? 'bg-blue-50 border border-blue-300' : 'hover:bg-slate-50 border border-transparent'}
+                    `}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={(e) => {
+                        const currentValues = Array.isArray(value) ? value : [];
+                        const newValues = e.target.checked
+                          ? [...currentValues, option.value]
+                          : currentValues.filter(v => v !== option.value);
+                        onChange(field.id, newValues);
+                      }}
+                      onClick={() => onFieldClick(field.id)}
+                      className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500"
+                    />
+                    <span className="text-sm text-slate-700">{option.label}</span>
+                  </label>
+                );
+              })}
+            </div>
+            {Array.isArray(value) && value.length > 0 && (
+              <div className="text-xs text-slate-600 mt-1">
+                Selected: {value.length} option{value.length !== 1 ? 's' : ''}
+              </div>
+            )}
+          </div>
+        ) : field.type === 'email' ? (
+          <input
+            type="email"
+            value={value as string}
+            onChange={(e) => onChange(field.id, e.target.value)}
             onClick={() => onFieldClick(field.id)}
-            className={`${baseClasses} min-h-[100px]`}
-          >
-            {field.options?.map((option: any) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            placeholder={field.placeholder || 'example@company.com'}
+            className={baseClasses}
+          />
+        ) : field.type === 'phone' ? (
+          <input
+            type="tel"
+            value={value as string}
+            onChange={(e) => onChange(field.id, e.target.value)}
+            onClick={() => onFieldClick(field.id)}
+            placeholder={field.placeholder || '(123) 456-7890'}
+            className={baseClasses}
+          />
         ) : (
           <input
-            type={field.type}
+            type={field.type || 'text'}
             value={value as string}
             onChange={(e) => onChange(field.id, e.target.value)}
             onClick={() => onFieldClick(field.id)}
@@ -118,7 +168,7 @@ export function LiveForm({
         {isFilled && !error && (
           <div className="absolute top-2 right-2 flex items-center gap-1 text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
             <Sparkles size={12} />
-            <span>AI filled</span>
+            <span>Filled</span>
           </div>
         )}
 

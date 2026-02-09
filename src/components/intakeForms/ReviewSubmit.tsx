@@ -15,6 +15,16 @@ export function ReviewSubmit({ template, data, onBack, onSubmit, onChange }: Rev
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const normalizeOptions = (options: any[]) => {
+    if (!options || options.length === 0) return [];
+    return options.map(option => {
+      if (typeof option === 'string') {
+        return { label: option, value: option };
+      }
+      return { label: option.label, value: option.value };
+    });
+  };
+
   const handleValidateAndSubmit = () => {
     const validationErrors = validateAllFields(template, data);
     setErrors(validationErrors);
@@ -171,15 +181,75 @@ export function ReviewSubmit({ template, data, onBack, onSubmit, onChange }: Rev
                             `}
                           >
                             <option value="">Select...</option>
-                            {field.options?.map((option) => (
+                            {normalizeOptions(field.options).map((option) => (
                               <option key={option.value} value={option.value}>
                                 {option.label}
                               </option>
                             ))}
                           </select>
+                        ) : field.type === 'multiselect' ? (
+                          <div className="space-y-2">
+                            <div className="space-y-1.5 max-h-48 overflow-y-auto border border-slate-300 rounded-lg p-2">
+                              {normalizeOptions(field.options).map((option) => {
+                                const isSelected = Array.isArray(value) && value.includes(option.value);
+                                return (
+                                  <label
+                                    key={option.value}
+                                    className={`
+                                      flex items-center gap-2 p-2 rounded cursor-pointer transition-all
+                                      ${isSelected ? 'bg-blue-50 border border-blue-300' : 'hover:bg-slate-50 border border-transparent'}
+                                    `}
+                                  >
+                                    <input
+                                      type="checkbox"
+                                      checked={isSelected}
+                                      onChange={(e) => {
+                                        const currentValues = Array.isArray(value) ? value : [];
+                                        const newValues = e.target.checked
+                                          ? [...currentValues, option.value]
+                                          : currentValues.filter(v => v !== option.value);
+                                        onChange(field.id, newValues);
+                                      }}
+                                      className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500"
+                                    />
+                                    <span className="text-sm text-slate-700">{option.label}</span>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                            {Array.isArray(value) && value.length > 0 && (
+                              <div className="text-xs text-slate-600">
+                                Selected: {value.length} option{value.length !== 1 ? 's' : ''}
+                              </div>
+                            )}
+                          </div>
+                        ) : field.type === 'email' ? (
+                          <input
+                            type="email"
+                            value={value as string}
+                            onChange={(e) => onChange(field.id, e.target.value)}
+                            placeholder="example@company.com"
+                            className={`
+                              w-full px-3 py-2 border rounded-lg transition-all
+                              ${error ? 'border-red-500' : 'border-slate-300'}
+                              focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none
+                            `}
+                          />
+                        ) : field.type === 'phone' ? (
+                          <input
+                            type="tel"
+                            value={value as string}
+                            onChange={(e) => onChange(field.id, e.target.value)}
+                            placeholder="(123) 456-7890"
+                            className={`
+                              w-full px-3 py-2 border rounded-lg transition-all
+                              ${error ? 'border-red-500' : 'border-slate-300'}
+                              focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none
+                            `}
+                          />
                         ) : (
                           <input
-                            type={field.type}
+                            type={field.type || 'text'}
                             value={value as string}
                             onChange={(e) => onChange(field.id, e.target.value)}
                             className={`
