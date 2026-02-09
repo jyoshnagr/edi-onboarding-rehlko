@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Volume2, VolumeX, Mic, MicOff, RotateCcw, MessageSquare, SkipForward, Pause, Play } from 'lucide-react';
 import { AvatarStatus } from '../../types';
 
@@ -15,7 +15,6 @@ interface AvatarProps {
   onSkip: () => void;
   sttSupported: boolean;
   ttsSupported: boolean;
-  currentText?: string;
 }
 
 export function Avatar({
@@ -31,10 +30,8 @@ export function Avatar({
   onSkip,
   sttSupported,
   ttsSupported,
-  currentText,
 }: AvatarProps) {
   const [showBlink, setShowBlink] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const blinkInterval = setInterval(() => {
@@ -45,20 +42,22 @@ export function Avatar({
     return () => clearInterval(blinkInterval);
   }, []);
 
-  useEffect(() => {
-    if (videoRef.current) {
-      if (status === 'speaking') {
-        videoRef.current.play().catch(err => console.log('Video play failed:', err));
-      } else {
-        videoRef.current.pause();
-        videoRef.current.currentTime = 0;
-      }
-    }
-  }, [status]);
-
   return (
     <div className="h-full flex flex-col bg-gradient-to-br from-blue-50 to-slate-50 p-2 overflow-y-auto">
       <style>{`
+        @keyframes breathe {
+          0%, 100% { transform: scale(1) translateY(0); }
+          50% { transform: scale(1.02) translateY(-2px); }
+        }
+        @keyframes subtleTilt {
+          0%, 100% { transform: rotate(0deg); }
+          25% { transform: rotate(-1deg); }
+          75% { transform: rotate(1deg); }
+        }
+        @keyframes mouthMove {
+          0%, 100% { transform: scaleY(0.3); }
+          50% { transform: scaleY(1); }
+        }
         @keyframes waveform {
           0%, 100% { height: 8px; }
           50% { height: 20px; }
@@ -75,25 +74,20 @@ export function Avatar({
           0%, 100% { opacity: 0.4; transform: scale(1); }
           50% { opacity: 0.8; transform: scale(1.1); }
         }
-        @keyframes shimmer {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
+        .avatar-breathe {
+          animation: breathe 4s ease-in-out infinite;
+        }
+        .avatar-tilt {
+          animation: subtleTilt 6s ease-in-out infinite;
         }
       `}</style>
 
       <div className="flex flex-col items-center justify-center mb-3">
         <div className="relative">
-          <div className="relative w-32 h-32 lg:w-40 lg:h-40">
+          <div className={`relative w-24 h-24 lg:w-32 lg:h-32 ${status === 'idle' ? 'avatar-breathe avatar-tilt' : ''}`}>
             {status === 'speaking' && (
-              <>
-                <div className="absolute inset-0 rounded-full bg-green-400 opacity-20 blur-xl"
-                     style={{ animation: 'glowPulse 1s ease-in-out infinite' }} />
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-green-400 via-emerald-400 to-green-400 opacity-10 blur-2xl"
-                     style={{
-                       animation: 'shimmer 2s linear infinite',
-                       backgroundSize: '200% 100%'
-                     }} />
-              </>
+              <div className="absolute inset-0 rounded-full bg-green-400 opacity-20 blur-xl"
+                   style={{ animation: 'glowPulse 1s ease-in-out infinite' }} />
             )}
             {status === 'listening' && (
               <div className="absolute inset-0 rounded-full bg-blue-400 opacity-20 blur-xl"
@@ -113,41 +107,30 @@ export function Avatar({
                   : 'ring-2 ring-slate-300 ring-offset-4 ring-offset-blue-50 shadow-xl'
               }`}
             >
-              <div className="w-full h-full rounded-full overflow-hidden shadow-2xl bg-slate-100 relative">
+              <div className="w-full h-full rounded-full overflow-hidden shadow-2xl bg-gradient-to-br from-slate-100 to-slate-200 relative">
                 {status === 'speaking' ? (
                   <video
-                    ref={videoRef}
-                    src="/jedi-speaking.mp4"
-                    loop
+                    src="/rhelo-speaking.mp4"
                     muted
+                    autoPlay
+                    loop
                     playsInline
                     className="w-full h-full object-cover transition-all duration-300 scale-110"
-                    style={{
-                      filter: 'brightness(1.05)',
+                     style={{
+                      filter: 'brightness(1.22)',
                     }}
                   />
                 ) : (
                   <img
-                    src="/jedi-avatar.png"
-                    alt="JEDI - EDI Integration Specialist"
-                    className="w-full h-full object-cover transition-all duration-300 scale-105"
+                    src="/rhelo-avatar.jpg"
+                    alt="Professional Avatar"
+                    className="w-full h-full object-cover"
+                      style={{
+                      filter: 'brightness(1.22)',
+                    }}
                   />
                 )}
-
-                {showBlink && status !== 'speaking' && (
-                  <div className="absolute inset-0 bg-black opacity-60 transition-opacity duration-150"
-                       style={{
-                         clipPath: 'ellipse(100% 5% at 50% 42%)'
-                       }} />
-                )}
-
-                {status === 'thinking' && (
-                  <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-transparent pointer-events-none" />
-                )}
-
-                {status === 'listening' && (
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent pointer-events-none" />
-                )}
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/5 pointer-events-none" />
               </div>
 
               {status === 'speaking' && (
@@ -218,9 +201,9 @@ export function Avatar({
           </div>
         </div>
 
-        <div className="mt-4 text-center">
-          <div className="text-xl font-bold bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent mb-1">JEDI</div>
-          <div className="text-xs text-slate-600 mb-2 font-medium tracking-wide">EDI Integration Specialist</div>
+        <div className="mt-3 text-center">
+          <div className="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-1">RHELO</div>
+          <div className="text-xs text-slate-600 mb-2 font-medium">Professional AI Assistant</div>
           <div className={`px-4 py-1.5 rounded-full shadow-md text-xs font-semibold border-2 inline-block ${
             status === 'speaking'
               ? 'bg-green-500 text-white border-green-600'

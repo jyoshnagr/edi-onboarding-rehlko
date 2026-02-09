@@ -297,7 +297,7 @@ export default function IntakeAnalysis() {
             <Sparkles className="w-6 h-6 text-blue-600" />
           </div>
           <div>
-            <h3 className="text-xl font-semibold text-gray-900">JEDI - AI Interview Assistant</h3>
+            <h3 className="text-xl font-semibold text-gray-900">RHELO - AI Interview Assistant</h3>
             <p className="text-sm text-gray-600">Your professional, energetic assistant for seamless intake completion</p>
           </div>
         </div>

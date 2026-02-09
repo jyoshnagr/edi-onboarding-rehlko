@@ -192,7 +192,7 @@ export function GuidedFormCompletion({
 
     if (prepopulatedFields.length > 0) {
       addAvatarMessage(
-        `Welcome! I'm JEDI, your virtual assistant. I've already filled in some information from your profile. Here's what I have:\n` +
+        `Welcome! I'm RHELO, your virtual assistant. I've already filled in some information from your profile. Here's what I have:\n` +
         prepopulatedFields.join('\n') +
         `\n\nPlease confirm if these details are correct, or let me know if you'd like to update anything.`,
         undefined,
@@ -648,7 +648,7 @@ export function GuidedFormCompletion({
           </h1>
             <span className="text-slate-400">-</span>
           <p className="text-sm text-slate-600">
-            Guided by JEDI (AI Assistant)
+            Guided by RHELO (AI Assistant)
           </p>
         </div>
 

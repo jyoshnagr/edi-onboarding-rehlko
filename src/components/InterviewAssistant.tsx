@@ -131,10 +131,10 @@ export default function InterviewAssistant({ intakeId, missingFieldsCount, onFie
             <MessageCircle className="w-8 h-8 text-white" />
           </div>
           <h3 className="text-2xl font-bold text-gray-900 mb-3">
-            Meet JEDI - Your AI Interview Assistant
+            Meet RHELO - Your AI Interview Assistant
           </h3>
           <p className="text-gray-700 mb-6">
-            I'm JEDI, your energetic AI assistant! I'll help you complete your intake by asking smart questions
+            I'm RHELO, your energetic AI assistant! I'll help you complete your intake by asking smart questions
             and guiding you through any gaps. Let's work together to gather all the information we need!
           </p>
 
@@ -182,7 +182,7 @@ export default function InterviewAssistant({ intakeId, missingFieldsCount, onFie
               <MessageCircle className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-gray-900">JEDI - Your AI Assistant</h3>
+              <h3 className="font-bold text-gray-900">RHELO - Your AI Assistant</h3>
               <p className="text-sm text-gray-600">Energetically helping you complete your intake!</p>
             </div>
           </div>

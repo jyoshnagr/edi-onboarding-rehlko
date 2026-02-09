@@ -152,7 +152,7 @@ export default function AIAvatarMeeting() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-slate-900">AI Avatar Meetings</h2>
-          <p className="text-slate-600 mt-1">Schedule and join meetings with JEDI, your professional AI assistant</p>
+          <p className="text-slate-600 mt-1">Schedule and join meetings with RHELO, your professional AI assistant</p>
         </div>
         {view === 'list' && (
           <button
@@ -181,9 +181,9 @@ export default function AIAvatarMeeting() {
                 <Video className="w-6 h-6 text-blue-600" />
               </div>
               <div className="flex-1">
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">Real-Time Meetings with JEDI</h3>
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">Real-Time Meetings with RHELO</h3>
                 <p className="text-sm text-slate-700 mb-4">
-                  Schedule meetings with JEDI, your professional and energetic AI assistant who delivers instant answers,
+                  Schedule meetings with RHELO, your professional and energetic AI assistant who delivers instant answers,
                   provides valuable insights, and captures decisions with precision in real-time.
                 </p>
                 <div className="grid grid-cols-3 gap-4 text-sm">
@@ -245,7 +245,7 @@ export default function AIAvatarMeeting() {
                           {meeting.ai_avatar_active && (
                             <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs font-medium flex items-center gap-1">
                               <Video className="w-3 h-3" />
-                              JEDI
+                              RHELO
                             </span>
                           )}
                         </div>
@@ -371,7 +371,7 @@ export default function AIAvatarMeeting() {
                 className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
               />
               <label htmlFor="includeAI" className="text-sm text-slate-700">
-                Include JEDI (AI Avatar) in this meeting
+                Include RHELO (AI Avatar) in this meeting
               </label>
             </div>
 
@@ -380,7 +380,7 @@ export default function AIAvatarMeeting() {
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-slate-700">
-                    <p className="font-medium text-slate-900 mb-1">JEDI will:</p>
+                    <p className="font-medium text-slate-900 mb-1">RHELO will:</p>
                     <ul className="list-disc list-inside space-y-1">
                       <li>Answer questions with professional expertise and enthusiasm</li>
                       <li>Provide instant, context-aware insights from intake documents</li>
@@ -462,7 +462,7 @@ export default function AIAvatarMeeting() {
                 {selectedMeeting.ai_avatar_active && (
                   <div className="flex items-center gap-2 text-sm">
                     <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
-                    <span className="text-slate-700 font-medium">JEDI (AI)</span>
+                    <span className="text-slate-700 font-medium">RHELO (AI)</span>
                   </div>
                 )}
               </div>
