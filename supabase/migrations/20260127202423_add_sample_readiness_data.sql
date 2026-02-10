@@ -8,19 +8,19 @@
   ## New Data
 
   ### Trading Partners
-  - Walmart Stores Inc. (existing partner, 3 previous onboardings)
-  - Target Corporation (existing partner, 2 previous onboardings)
-  - Kroger Company (new partner, 0 previous onboardings)
-  - Costco Wholesale (existing partner, 5 previous onboardings)
-  - Amazon Fulfillment Services (new partner, 0 previous onboardings)
+  - Lowe's (existing partner, 3 previous onboardings)
+  - Home Depot (existing partner, 2 previous onboardings)
+  - Ace Hardware (new partner, 0 previous onboardings)
+  - Menards (existing partner, 5 previous onboardings)
+  - Tractor Supply Co. (new partner, 0 previous onboardings)
 
   ### Onboarding Requests
   Creates 5 onboarding requests with different readiness scenarios:
-  1. High readiness (85%) - Walmart repeat partner with complete information
-  2. Medium readiness (65%) - Target with some missing data
-  3. Low readiness (45%) - Kroger new partner with significant gaps
-  4. High readiness (90%) - Costco well-established partner
-  5. Medium-low readiness (55%) - Amazon with technical complexities
+  1. High readiness (85%) - Lowe's repeat partner with complete information
+  2. Medium readiness (65%) - Home Depot with some missing data
+  3. Low readiness (45%) - Ace Hardware new partner with significant gaps
+  4. High readiness (90%) - Menards well-established partner
+  5. Medium-low readiness (55%) - Tractor Supply Co. with technical complexities
 
   ### Readiness Scores
   - Detailed score factor breakdowns for each request
@@ -40,11 +40,11 @@
 -- Insert Trading Partners
 INSERT INTO trading_partners (id, name, is_existing, previous_onboardings, typical_requirements, created_at, updated_at)
 VALUES
-  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Walmart Stores Inc.', true, 3, '{"protocol": "AS2", "wms": "Manhattan", "transactions": ["850", "856", "810"]}', now() - interval '2 years', now()),
-  ('b2c3d4e5-f6a7-8901-bcde-f12345678901', 'Target Corporation', true, 2, '{"protocol": "AS2", "wms": "Blue Yonder", "transactions": ["850", "855", "856"]}', now() - interval '1 year', now()),
-  ('c3d4e5f6-a7b8-9012-cdef-123456789012', 'Kroger Company', false, 0, '{}', now() - interval '1 month', now()),
-  ('d4e5f6a7-b8c9-0123-def1-234567890123', 'Costco Wholesale', true, 5, '{"protocol": "SFTP", "wms": "SAP EWM", "transactions": ["850", "856", "810", "997"]}', now() - interval '3 years', now()),
-  ('e5f6a7b8-c9d0-1234-ef12-345678901234', 'Amazon Fulfillment Services', false, 0, '{}', now() - interval '2 weeks', now())
+  ('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 'Lowe''s', true, 3, '{"protocol": "AS2", "wms": "Manhattan", "transactions": ["850", "856", "810"]}', now() - interval '2 years', now()),
+  ('b2c3d4e5-f6a7-8901-bcde-f12345678901', 'Home Depot', true, 2, '{"protocol": "AS2", "wms": "Blue Yonder", "transactions": ["850", "855", "856"]}', now() - interval '1 year', now()),
+  ('c3d4e5f6-a7b8-9012-cdef-123456789012', 'Ace Hardware', false, 0, '{}', now() - interval '1 month', now()),
+  ('d4e5f6a7-b8c9-0123-def1-234567890123', 'Menards', true, 5, '{"protocol": "SFTP", "wms": "SAP EWM", "transactions": ["850", "856", "810", "997"]}', now() - interval '3 years', now()),
+  ('e5f6a7b8-c9d0-1234-ef12-345678901234', 'Tractor Supply Co.', false, 0, '{}', now() - interval '2 weeks', now())
 ON CONFLICT (id) DO NOTHING;
 
 -- Insert Onboarding Requests
@@ -208,9 +208,9 @@ VALUES
     }',
     '[
       "Fast-track approval recommended - all prerequisites met",
-      "Leverage existing Walmart mapping templates from previous integrations",
+      "Leverage existing Lowe's mapping templates from previous integrations",
       "Schedule kickoff meeting within 3 business days",
-      "Assign senior developer familiar with Walmart patterns"
+      "Assign senior developer familiar with Lowe's patterns"
     ]',
     now() - interval '2 days',
     now() - interval '2 days'
@@ -229,7 +229,7 @@ VALUES
       "protocol_readiness": 80
     }',
     '[
-      "Schedule clarification call with Target EDI team within 48 hours",
+      "Schedule clarification call with Home Depot EDI team within 48 hours",
       "Request detailed 855 ACK business rules and test scenarios",
       "Confirm Atlanta DC product code mapping requirements",
       "Extend timeline by 1 week to accommodate additional testing",
@@ -253,11 +253,11 @@ VALUES
     }',
     '[
       "Do NOT approve - critical information gaps must be resolved first",
-      "Schedule comprehensive intake workshop with Kroger technical team",
+      "Schedule comprehensive intake workshop with Ace Hardware technical team",
       "Provide detailed intake template with specific SAP EWM requirements",
       "Assign solution architect to assess WMS integration complexity",
       "Extend requested go-live date by 30 days minimum",
-      "Request access to Kroger test environment for early validation"
+      "Request access to Ace Hardware test environment for early validation"
     ]',
     now() - interval '1 day',
     now() - interval '1 day'
@@ -301,7 +301,7 @@ VALUES
     '[
       "Conditional approval - scope refinement required before development",
       "Schedule scoping workshop focused on 846 and 940 requirements",
-      "Request Amazon provide detailed use cases for bidirectional inventory",
+      "Request Tractor Supply Co. provide detailed use cases for bidirectional inventory",
       "Assess WMS configuration effort for 940 warehouse shipping orders",
       "Break implementation into phases: Phase 1 (850/856/810), Phase 2 (846/940)",
       "Extend timeline by 2 weeks to accommodate scope clarification"
@@ -317,7 +317,7 @@ INSERT INTO blockers (
   resolution_required, resolved, created_at, updated_at
 )
 VALUES
-  -- Blockers for Kroger (REQ-2026-003) - Low readiness
+  -- Blockers for Ace Hardware (REQ-2026-003) - Low readiness
   (
     'd6e7f8a9-b0c1-2345-0123-456789012345',
     'b8c9d0e1-f2a3-4567-2345-678901234567',
@@ -367,14 +367,14 @@ VALUES
     now() - interval '1 day'
   ),
   
-  -- Blockers for Target (REQ-2026-002) - Medium readiness
+  -- Blockers for Home Depot (REQ-2026-002) - Medium readiness
   (
     'b0c1d2e3-f4a5-6789-4567-890123456789',
     'a7b8c9d0-e1f2-3456-1234-567890123456',
     'missing_data',
     'medium',
     'Purchase Order Acknowledgment (855) Test Scenarios Missing',
-    'Target requires 855 ACK transaction but has not provided detailed test scenarios or business rules. Need to understand acceptance/rejection logic, partial acceptance handling, and timing requirements.',
+    'Home Depot requires 855 ACK transaction but has not provided detailed test scenarios or business rules. Need to understand acceptance/rejection logic, partial acceptance handling, and timing requirements.',
     true,
     false,
     now() - interval '1 day',
@@ -393,14 +393,14 @@ VALUES
     now() - interval '1 day'
   ),
 
-  -- Blockers for Amazon (REQ-2026-005) - Medium-low readiness
+  -- Blockers for Tractor Supply Co. (REQ-2026-005) - Medium-low readiness
   (
     'd2e3f4a5-b6c7-8901-6789-012345678901',
     'd0e1f2a3-b4c5-6789-4567-890123456789',
     'scope_ambiguity',
     'high',
     'Bidirectional 846 Inventory Sync Requirements Undefined',
-    'Amazon requires real-time inventory synchronization using 846 transactions, but has not specified frequency, variance thresholds, or error handling procedures. This is a complex requirement that needs detailed specification.',
+    'Tractor Supply Co. requires real-time inventory synchronization using 846 transactions, but has not specified frequency, variance thresholds, or error handling procedures. This is a complex requirement that needs detailed specification.',
     true,
     false,
     now() - interval '1 day',
@@ -424,7 +424,7 @@ VALUES
     'protocol_requirement',
     'low',
     'EDI Testing Timeline Not Provided',
-    'Amazon has not committed to specific testing timeline or resource availability. Need to coordinate testing schedule to meet aggressive go-live date.',
+    'Tractor Supply Co. has not committed to specific testing timeline or resource availability. Need to coordinate testing schedule to meet aggressive go-live date.',
     false,
     false,
     now() - interval '1 day',

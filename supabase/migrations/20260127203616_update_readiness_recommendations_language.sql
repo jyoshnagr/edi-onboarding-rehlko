@@ -6,12 +6,12 @@
   on collaboration and successful outcomes rather than critical language.
 
   ## Changes
-  - Updates Kroger recommendations to be more collaborative
+  - Updates Ace Hardware recommendations to be more collaborative
   - Removes negative phrasing like "Do NOT approve"
   - Focuses on partnership and knowledge transfer
 */
 
--- Update Kroger readiness score recommendations to be more supportive
+-- Update Ace Hardware readiness score recommendations to be more supportive
 UPDATE readiness_scores
 SET 
   recommendations = '[

@@ -131,9 +131,9 @@ function generateMockEnrichment(intake: any) {
       level: "Intermediate",
       notes: "Currently using EDI with 3 other trading partners. Familiar with X12 850/810 transactions.",
       existing_integrations: [
-        { partner: "Sysco", protocol: "AS2", transactions: ["850", "810", "856"] },
-        { partner: "US Foods", protocol: "SFTP", transactions: ["850", "810"] },
-        { partner: "Gordon Food Service", protocol: "AS2", transactions: ["850", "810", "856", "997"] }
+        { partner: "Home Depot", protocol: "AS2", transactions: ["850", "810", "856"] },
+        { partner: "Lowe's", protocol: "SFTP", transactions: ["850", "810"] },
+        { partner: "Menards", protocol: "AS2", transactions: ["850", "810", "856", "997"] }
       ],
       known_pain_points: [
         "Manual intervention required for UOM mismatches",
