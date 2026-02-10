@@ -37,34 +37,84 @@ export default function AIIntakeForm() {
   const [avatarModeStarted, setAvatarModeStarted] = useState(false);
 
   const normalizeTemplate = (template: FormTemplate): FormTemplate => {
+    const normalizeOptions = (field: any) => {
+      if (!field.options) {
+        return field;
+      }
+
+      const normalizedOptions = field.options
+        .map((option: any) => {
+          if (typeof option === 'string') {
+            return { value: option, label: option };
+          }
+          if (option && typeof option === 'object') {
+            const value = option.value ?? option.id ?? option.label ?? '';
+            const label = option.label ?? option.value ?? option.id ?? '';
+            if (value === '' && label === '') {
+              return null;
+            }
+            return { value: String(value), label: String(label) };
+          }
+          return null;
+        })
+        .filter(Boolean) as { value: string; label: string }[];
+
+      return {
+        ...field,
+        options: normalizedOptions,
+      };
+    };
+
+    const splitRepresentativeField = (field: any) => {
+      const label = String(field.label ?? '').toLowerCase();
+      const isBusinessRep = label.includes('business representative');
+      const isItProjectManager = label.includes('it project manager');
+      if (!isBusinessRep && !isItProjectManager) {
+        return null;
+      }
+
+      const hint = `${field.placeholder ?? ''} ${field.helpText ?? ''} ${field.avatarPrompt ?? ''}`.toLowerCase();
+      const indicatesNameEmail =
+        (label.includes('name') && label.includes('email')) ||
+        (hint.includes('name') && hint.includes('email'));
+
+      if (!indicatesNameEmail) {
+        return null;
+      }
+
+      const baseId = String(field.id ?? 'business_representative');
+      const baseLabel = field.label ?? (isItProjectManager ? 'IT Project Manager' : 'Business Representative');
+
+      return [
+        {
+          ...field,
+          id: `${baseId}_name`,
+          label: `${baseLabel} Name`,
+          type: 'text',
+          placeholder: field.placeholder || 'Full name',
+          avatarPrompt: `Please provide the name for ${baseLabel}.`,
+          options: undefined,
+        },
+        {
+          ...field,
+          id: `${baseId}_email`,
+          label: `${baseLabel} Email`,
+          type: 'email',
+          placeholder: 'name@company.com',
+          avatarPrompt: `Please provide the email for ${baseLabel}.`,
+          options: undefined,
+        },
+      ];
+    };
+
     const normalizedSections = template.sections.map((section) => ({
       ...section,
-      fields: section.fields.map((field) => {
-        if (!field.options) {
-          return field;
+      fields: section.fields.flatMap((field) => {
+        const splitFields = splitRepresentativeField(field);
+        if (splitFields) {
+          return splitFields.map((item) => normalizeOptions(item));
         }
-
-        const normalizedOptions = field.options
-          .map((option: any) => {
-            if (typeof option === 'string') {
-              return { value: option, label: option };
-            }
-            if (option && typeof option === 'object') {
-              const value = option.value ?? option.id ?? option.label ?? '';
-              const label = option.label ?? option.value ?? option.id ?? '';
-              if (value === '' && label === '') {
-                return null;
-              }
-              return { value: String(value), label: String(label) };
-            }
-            return null;
-          })
-          .filter(Boolean) as { value: string; label: string }[];
-
-        return {
-          ...field,
-          options: normalizedOptions,
-        };
+        return [normalizeOptions(field)];
       }),
     }));
 
