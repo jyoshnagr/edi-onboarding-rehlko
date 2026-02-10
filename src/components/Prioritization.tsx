@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase, OnboardingRequest } from '../lib/supabase';
-import { ListChecks, TrendingUp, AlertCircle, Clock, DollarSign, Zap, ArrowUpDown, CheckCircle2, Circle, Download, FileJson, FileSpreadsheet, ExternalLink, Edit3, Trash2 } from 'lucide-react';
-import { exportActionItemsToJira } from '../lib/jiraExport';
+import { ListChecks, TrendingUp, AlertCircle, Clock, DollarSign, Zap, ArrowUpDown, CheckCircle2, Circle, Download, FileSpreadsheet, Edit3, Trash2 } from 'lucide-react';
+import { exportActionItemsToSmartsheet } from '../lib/smartsheetExport';
 
 type SortCriteria = 'ai_recommended' | 'business_value' | 'readiness' | 'timeline';
 type ViewMode = 'requests' | 'action_items';
@@ -32,7 +32,6 @@ export default function Prioritization() {
   const [sortBy, setSortBy] = useState<SortCriteria>('ai_recommended');
   const [loading, setLoading] = useState(true);
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
-  const [showExportMenu, setShowExportMenu] = useState(false);
   const [editingItem, setEditingItem] = useState<string | null>(null);
 
   useEffect(() => {
@@ -115,14 +114,13 @@ export default function Prioritization() {
     }
   };
 
-  const handleExport = (format: 'json' | 'csv' | 'jira') => {
+  const handleExport = () => {
     const itemsToExport = selectedItems.size > 0
       ? actionItems.filter(item => selectedItems.has(item.id))
       : actionItems;
 
     const companyName = itemsToExport[0]?.company_name || 'EDI_Project';
-    exportActionItemsToJira(itemsToExport, format, companyName);
-    setShowExportMenu(false);
+    exportActionItemsToSmartsheet(itemsToExport, companyName);
   };
 
   const handleClearAll = async () => {
@@ -242,7 +240,7 @@ export default function Prioritization() {
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-slate-900 mb-2">Action Items Management</h3>
                 <p className="text-sm text-slate-700 mb-4">
-                  Track, manage, and export action items to JIRA
+                  Track, manage, and export action items to SmartSheet
                 </p>
                 <div className="grid grid-cols-5 gap-4 text-sm">
                   <div>
@@ -303,50 +301,14 @@ export default function Prioritization() {
                   <Trash2 className="w-4 h-4" />
                   Clear All
                 </button>
-                <div className="relative">
-                  <button
-                    onClick={() => setShowExportMenu(!showExportMenu)}
-                    disabled={actionItems.length === 0}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-medium rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Download className="w-4 h-4" />
-                    Export to JIRA
-                  </button>
-                  {showExportMenu && (
-                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-slate-200 z-10">
-                      <div className="p-2">
-                        <button
-                          onClick={() => handleExport('jira')}
-                          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg"
-                        >
-                          <ExternalLink className="w-4 h-4 text-green-600" />
-                          <span>JIRA Import Format (CSV)</span>
-                        </button>
-                        <button
-                          onClick={() => handleExport('json')}
-                          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg"
-                        >
-                          <FileJson className="w-4 h-4 text-blue-600" />
-                          <span>JSON Format</span>
-                        </button>
-                        <button
-                          onClick={() => handleExport('csv')}
-                          className="w-full flex items-center gap-3 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 rounded-lg"
-                        >
-                          <FileSpreadsheet className="w-4 h-4 text-orange-600" />
-                          <span>Full CSV Export</span>
-                        </button>
-                      </div>
-                      <div className="border-t border-slate-200 p-2">
-                        <p className="text-xs text-slate-500 px-3 py-1">
-                          {selectedItems.size > 0
-                            ? `Export ${selectedItems.size} selected items`
-                            : `Export all ${actionItems.length} items`}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <button
+                  onClick={handleExport}
+                  disabled={actionItems.length === 0}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-medium rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <FileSpreadsheet className="w-4 h-4" />
+                  Export to SmartSheet
+                </button>
               </div>
             </div>
 

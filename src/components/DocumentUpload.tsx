@@ -75,6 +75,17 @@ export default function DocumentUpload({ onUploadComplete }: DocumentUploadProps
       // Filter out any failed reads
       const validAttachments = attachmentsData.filter(a => a !== null);
 
+      // Load Business Specs reference document
+      let businessSpecsText: string | undefined;
+      try {
+        const businessSpecsResponse = await fetch('/supabase/data/Rehlko_EDI_PO_850_004010_Spec_(1).docx');
+        if (businessSpecsResponse.ok) {
+          businessSpecsText = await businessSpecsResponse.text();
+        }
+      } catch (error) {
+        console.log('Business specs not available, proceeding without reference');
+      }
+
       const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-intake-document`;
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -85,7 +96,8 @@ export default function DocumentUpload({ onUploadComplete }: DocumentUploadProps
         body: JSON.stringify({
           documentText,
           fileName: file.name,
-          attachments: validAttachments
+          attachments: validAttachments,
+          businessSpecsText
         }),
       });
 

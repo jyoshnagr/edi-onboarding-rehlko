@@ -17,6 +17,7 @@ interface AnalysisRequest {
   documentText: string;
   fileName: string;
   attachments?: DocumentInput[];
+  businessSpecsText?: string;
 }
 
 Deno.serve(async (req: Request) => {
@@ -28,7 +29,7 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { documentText, fileName, attachments = [] }: AnalysisRequest = await req.json();
+    const { documentText, fileName, attachments = [], businessSpecsText }: AnalysisRequest = await req.json();
 
     if (!documentText || !fileName) {
       return new Response(
@@ -48,6 +49,18 @@ Deno.serve(async (req: Request) => {
 
     // Process attachments and combine with main document
     let combinedDocumentText = `MAIN INTAKE DOCUMENT (${fileName}):\n${truncatedText}`;
+
+    // Add Business Specs as reference if provided
+    if (businessSpecsText) {
+      const maxBusinessSpecsChars = 10000;
+      const truncatedSpecs = businessSpecsText.length > maxBusinessSpecsChars
+        ? businessSpecsText.substring(0, maxBusinessSpecsChars) + "\n\n[Business specs truncated]"
+        : businessSpecsText;
+
+      combinedDocumentText += "\n\n" + "=".repeat(80) + "\n";
+      combinedDocumentText += "BUSINESS SPECIFICATIONS REFERENCE:\n" + "=".repeat(80) + "\n\n";
+      combinedDocumentText += truncatedSpecs + "\n\n";
+    }
 
     if (attachments.length > 0) {
       combinedDocumentText += "\n\n" + "=".repeat(80) + "\n";
@@ -71,6 +84,12 @@ Deno.serve(async (req: Request) => {
     }
 
     const systemPrompt = createSystemPrompt(`You are an EDI onboarding specialist. Analyze intake documents and extract ALL available information.
+
+When a Business Specifications document is provided as reference, use it to:
+- Validate requirements against established standards
+- Identify gaps between customer request and standard specifications
+- Assess complexity based on deviation from standard specs
+- Provide recommendations aligned with business specifications
 
 CRITICAL REQUIREMENTS:
 
@@ -126,7 +145,7 @@ Extract real data from the document. Calculate meaningful readiness scores.`, tr
 
     const userPrompt = {
       role: 'user' as const,
-      content: `Analyze this EDI onboarding intake submission. The main intake form is provided along with ${attachments.length} supporting document(s). Consider ALL documents together for a comprehensive analysis.
+      content: `Analyze this EDI onboarding intake submission. The main intake form is provided along with ${attachments.length} supporting document(s)${businessSpecsText ? ' and a Business Specifications reference document' : ''}. Consider ALL documents together for a comprehensive analysis${businessSpecsText ? ', and validate the intake against the Business Specifications provided' : ''}.
 
 ${combinedDocumentText}
 
