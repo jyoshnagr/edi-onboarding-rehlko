@@ -10,6 +10,7 @@ interface AttachmentFile {
   file: File;
   category: string;
   description: string;
+  subcategory?: string;
 }
 
 export default function DocumentUpload({ onUploadComplete }: DocumentUploadProps) {
@@ -20,6 +21,7 @@ export default function DocumentUpload({ onUploadComplete }: DocumentUploadProps
   const [extractedData, setExtractedData] = useState<any>(null);
   const [showAttachmentForm, setShowAttachmentForm] = useState(false);
   const [attachmentCategory, setAttachmentCategory] = useState('other');
+  const [attachmentSubcategory, setAttachmentSubcategory] = useState('');
   const [attachmentDescription, setAttachmentDescription] = useState('');
   const [uploadingAttachment, setUploadingAttachment] = useState(false);
   const [intakeId, setIntakeId] = useState<string | null>(null);
@@ -313,6 +315,7 @@ export default function DocumentUpload({ onUploadComplete }: DocumentUploadProps
     setIntakeId(null);
     setShowAttachmentForm(false);
     setAttachmentCategory('other');
+    setAttachmentSubcategory('');
     setAttachmentDescription('');
     setPendingAttachments([]);
     setShowInitialAttachments(false);
@@ -326,11 +329,13 @@ export default function DocumentUpload({ onUploadComplete }: DocumentUploadProps
     setPendingAttachments(prev => [...prev, {
       file,
       category: attachmentCategory,
-      description: attachmentDescription
+      description: attachmentDescription,
+      subcategory: attachmentCategory === 'po_specs' ? attachmentSubcategory : undefined
     }]);
 
     setShowInitialAttachments(false);
     setAttachmentCategory('other');
+    setAttachmentSubcategory('');
     setAttachmentDescription('');
   };
 
@@ -386,13 +391,20 @@ export default function DocumentUpload({ onUploadComplete }: DocumentUploadProps
   };
 
   const categories = [
-    { value: 'data_format', label: 'Data Format Specification' },
+    { value: 'po_specs', label: 'Purchase Order Specifications' },
     { value: 'mapping_spec', label: 'Mapping Specifications' },
     { value: 'test_data', label: 'Test Data Files' },
     { value: 'business_rules', label: 'Business Rules' },
     { value: 'technical_spec', label: 'Technical Documentation' },
     { value: 'compliance', label: 'Compliance Documents' },
     { value: 'other', label: 'Other' }
+  ];
+
+  const poSubcategories = [
+    { value: 'transaction_set', label: 'Transaction Set' },
+    { value: 'administrative_document', label: 'Administrative document' },
+    { value: 'routing_document', label: 'Routing document' },
+    { value: 'pricing_information', label: 'Pricing Information' }
   ];
 
   return (
@@ -474,6 +486,7 @@ export default function DocumentUpload({ onUploadComplete }: DocumentUploadProps
                       <div className="font-medium text-sm text-gray-900">{attachment.file.name}</div>
                       <div className="text-xs text-gray-600 mt-1">
                         {categories.find(c => c.value === attachment.category)?.label || 'Other'}
+                        {attachment.subcategory && ` - ${poSubcategories.find(s => s.value === attachment.subcategory)?.label}`}
                         {attachment.description && ` • ${attachment.description}`}
                       </div>
                     </div>
@@ -497,6 +510,7 @@ export default function DocumentUpload({ onUploadComplete }: DocumentUploadProps
                       setShowInitialAttachments(false);
                       setAttachmentDescription('');
                       setAttachmentCategory('other');
+                      setAttachmentSubcategory('');
                     }}
                     className="text-gray-400 hover:text-gray-600"
                   >
@@ -511,7 +525,12 @@ export default function DocumentUpload({ onUploadComplete }: DocumentUploadProps
                     </label>
                     <select
                       value={attachmentCategory}
-                      onChange={(e) => setAttachmentCategory(e.target.value)}
+                      onChange={(e) => {
+                        setAttachmentCategory(e.target.value);
+                        if (e.target.value !== 'po_specs') {
+                          setAttachmentSubcategory('');
+                        }
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     >
                       {categories.map((cat) => (
@@ -521,6 +540,26 @@ export default function DocumentUpload({ onUploadComplete }: DocumentUploadProps
                       ))}
                     </select>
                   </div>
+
+                  {attachmentCategory === 'po_specs' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Specification Type
+                      </label>
+                      <select
+                        value={attachmentSubcategory}
+                        onChange={(e) => setAttachmentSubcategory(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      >
+                        <option value="">Select a type...</option>
+                        {poSubcategories.map((subcat) => (
+                          <option key={subcat.value} value={subcat.value}>
+                            {subcat.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -687,6 +726,7 @@ export default function DocumentUpload({ onUploadComplete }: DocumentUploadProps
                       setShowAttachmentForm(false);
                       setAttachmentDescription('');
                       setAttachmentCategory('other');
+                      setAttachmentSubcategory('');
                     }}
                     className="text-gray-400 hover:text-gray-600"
                   >
@@ -701,7 +741,12 @@ export default function DocumentUpload({ onUploadComplete }: DocumentUploadProps
                     </label>
                     <select
                       value={attachmentCategory}
-                      onChange={(e) => setAttachmentCategory(e.target.value)}
+                      onChange={(e) => {
+                        setAttachmentCategory(e.target.value);
+                        if (e.target.value !== 'po_specs') {
+                          setAttachmentSubcategory('');
+                        }
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       {categories.map((cat) => (
@@ -711,6 +756,26 @@ export default function DocumentUpload({ onUploadComplete }: DocumentUploadProps
                       ))}
                     </select>
                   </div>
+
+                  {attachmentCategory === 'po_specs' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Specification Type
+                      </label>
+                      <select
+                        value={attachmentSubcategory}
+                        onChange={(e) => setAttachmentSubcategory(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="">Select a type...</option>
+                        {poSubcategories.map((subcat) => (
+                          <option key={subcat.value} value={subcat.value}>
+                            {subcat.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
