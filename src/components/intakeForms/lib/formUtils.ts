@@ -117,11 +117,11 @@ export function extractValueFromResponse(response: string, field: FormField): st
 
   if (field.type === 'date') {
     // Try to extract date patterns
-    // Handle formats like "January 15, 1990" or "01/15/1990" or "1990-01-15"
+    // Handle formats like "January 15, 1990" or "01/15/1990" or "1990-01-15" or "February 14th 2026"
     const datePatterns = [
       /\d{4}-\d{2}-\d{2}/,  // ISO format
       /\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}/, // MM/DD/YYYY or similar
-      /(january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2},?\s+\d{4}/i,
+      /(january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}(st|nd|rd|th)?,?\s+\d{4}/i, // With optional ordinal suffix
     ];
 
     for (const pattern of datePatterns) {
