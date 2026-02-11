@@ -84,7 +84,7 @@ export function Avatar({
 
       <div className="flex flex-col items-center justify-center mb-3">
         <div className="relative">
-          <div className={`relative w-24 h-24 lg:w-32 lg:h-32 ${status === 'idle' ? 'avatar-breathe avatar-tilt' : ''}`}>
+          <div className={`relative w-40 h-40 lg:w-48 lg:h-48 ${status === 'idle' ? 'avatar-breathe avatar-tilt' : ''}`}>
             {status === 'speaking' && (
               <div className="absolute inset-0 rounded-full bg-green-400 opacity-20 blur-xl"
                    style={{ animation: 'glowPulse 1s ease-in-out infinite' }} />
