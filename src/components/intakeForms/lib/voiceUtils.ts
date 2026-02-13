@@ -6,6 +6,7 @@ export class VoiceManager {
   private pausedTranscript = '';
   private onResultCallback: ((transcript: string, confidence?: number, isFinal?: boolean, alternatives?: string[]) => void) | null = null;
   private onErrorCallback: ((error: string) => void) | null = null;
+  private currentLanguage: string = 'en-US';
 
   constructor() {
     if ('speechSynthesis' in window) {
@@ -18,8 +19,19 @@ export class VoiceManager {
       this.recognition.continuous = false;
       this.recognition.interimResults = true;
       this.recognition.maxAlternatives = 3;
-      this.recognition.lang = 'en-US';
+      this.recognition.lang = this.currentLanguage;
     }
+  }
+
+  setLanguage(language: string): void {
+    this.currentLanguage = language;
+    if (this.recognition) {
+      this.recognition.lang = language;
+    }
+  }
+
+  getLanguage(): string {
+    return this.currentLanguage;
   }
 
   speak(text: string, onEnd?: () => void): void {
@@ -38,44 +50,80 @@ export class VoiceManager {
 
     const voices = this.synthesis.getVoices();
 
-    const professionalMaleVoices = [
-      'Google UK English Male',
-      'Google US English Male',
-      'Microsoft David',
-      'Microsoft Mark',
-      'Daniel',
-      'Alex',
-      'Fred',
-      'Oliver',
-      'Thomas',
-      'Google Australian English Male',
-      'Google Indian English Male',
-      'James',
-      'Ryan'
-    ];
+    const isItalian = this.currentLanguage.startsWith('it');
 
-    let selectedVoice = voices.find(voice => {
-      const isEnglish = voice.lang.startsWith('en');
-      const isMale = voice.name.toLowerCase().includes('male') ||
-                     professionalMaleVoices.some(pv => voice.name.includes(pv));
-      const notPremium = !voice.name.includes('Premium') && !voice.name.includes('Enhanced');
-      const notRobotic = !voice.name.includes('eSpeak') && !voice.name.includes('Compact');
+    if (isItalian) {
+      // Italian voice selection
+      const professionalItalianMaleVoices = [
+        'Google italiano',
+        'Microsoft Cosimo',
+        'Diego',
+        'Luca',
+        'Paolo'
+      ];
 
-      return isEnglish && isMale && notPremium && notRobotic &&
-             professionalMaleVoices.some(pv => voice.name.includes(pv));
-    });
-
-    if (!selectedVoice) {
-      selectedVoice = voices.find(voice => {
-        const isEnglish = voice.lang.startsWith('en');
-        const isMale = voice.name.toLowerCase().includes('male');
+      let selectedVoice = voices.find(voice => {
+        const isItalianLang = voice.lang.startsWith('it');
+        const isMale = voice.name.toLowerCase().includes('male') ||
+                       professionalItalianMaleVoices.some(pv => voice.name.includes(pv));
+        const notPremium = !voice.name.includes('Premium') && !voice.name.includes('Enhanced');
         const notRobotic = !voice.name.includes('eSpeak') && !voice.name.includes('Compact');
-        return isEnglish && isMale && notRobotic;
-      });
-    }
 
-    if (selectedVoice) {
-      utterance.voice = selectedVoice;
+        return isItalianLang && isMale && notPremium && notRobotic;
+      });
+
+      if (!selectedVoice) {
+        selectedVoice = voices.find(voice => {
+          const isItalianLang = voice.lang.startsWith('it');
+          const notRobotic = !voice.name.includes('eSpeak') && !voice.name.includes('Compact');
+          return isItalianLang && notRobotic;
+        });
+      }
+
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
+    } else {
+      // English voice selection
+      const professionalMaleVoices = [
+        'Google UK English Male',
+        'Google US English Male',
+        'Microsoft David',
+        'Microsoft Mark',
+        'Daniel',
+        'Alex',
+        'Fred',
+        'Oliver',
+        'Thomas',
+        'Google Australian English Male',
+        'Google Indian English Male',
+        'James',
+        'Ryan'
+      ];
+
+      let selectedVoice = voices.find(voice => {
+        const isEnglish = voice.lang.startsWith('en');
+        const isMale = voice.name.toLowerCase().includes('male') ||
+                       professionalMaleVoices.some(pv => voice.name.includes(pv));
+        const notPremium = !voice.name.includes('Premium') && !voice.name.includes('Enhanced');
+        const notRobotic = !voice.name.includes('eSpeak') && !voice.name.includes('Compact');
+
+        return isEnglish && isMale && notPremium && notRobotic &&
+               professionalMaleVoices.some(pv => voice.name.includes(pv));
+      });
+
+      if (!selectedVoice) {
+        selectedVoice = voices.find(voice => {
+          const isEnglish = voice.lang.startsWith('en');
+          const isMale = voice.name.toLowerCase().includes('male');
+          const notRobotic = !voice.name.includes('eSpeak') && !voice.name.includes('Compact');
+          return isEnglish && isMale && notRobotic;
+        });
+      }
+
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
     }
 
     if (onEnd) {

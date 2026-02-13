@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Volume2, VolumeX, Mic, MicOff, RotateCcw, MessageSquare, SkipForward, Pause, Play } from 'lucide-react';
+import { Volume2, VolumeX, Mic, MicOff, RotateCcw, MessageSquare, SkipForward, Pause, Play, Languages } from 'lucide-react';
 import { AvatarStatus } from '../../types';
 
 interface AvatarProps {
@@ -15,6 +15,8 @@ interface AvatarProps {
   onSkip: () => void;
   sttSupported: boolean;
   ttsSupported: boolean;
+  currentLanguage?: string;
+  onLanguageChange?: (language: string) => void;
 }
 
 export function Avatar({
@@ -30,8 +32,11 @@ export function Avatar({
   onSkip,
   sttSupported,
   ttsSupported,
+  currentLanguage = 'en-US',
+  onLanguageChange,
 }: AvatarProps) {
   const [showBlink, setShowBlink] = useState(false);
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
 
   useEffect(() => {
     const blinkInterval = setInterval(() => {
@@ -241,6 +246,46 @@ export function Avatar({
               {voiceEnabled ? <Volume2 size={14} /> : <VolumeX size={14} />}
               <span>Voice</span>
             </button>
+          )}
+
+          {onLanguageChange && (
+            <div className="relative">
+              <button
+                onClick={() => setShowLanguageMenu(!showLanguageMenu)}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 transition-all text-xs font-medium"
+                title="Select language"
+              >
+                <Languages size={14} />
+                <span>{currentLanguage === 'it-IT' ? 'IT' : 'EN'}</span>
+              </button>
+
+              {showLanguageMenu && (
+                <div className="absolute top-full mt-1 left-0 bg-white border border-slate-300 rounded-lg shadow-lg z-10 min-w-[120px]">
+                  <button
+                    onClick={() => {
+                      onLanguageChange('en-US');
+                      setShowLanguageMenu(false);
+                    }}
+                    className={`w-full text-left px-3 py-2 text-xs hover:bg-slate-50 transition-colors ${
+                      currentLanguage === 'en-US' ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-700'
+                    }`}
+                  >
+                    English
+                  </button>
+                  <button
+                    onClick={() => {
+                      onLanguageChange('it-IT');
+                      setShowLanguageMenu(false);
+                    }}
+                    className={`w-full text-left px-3 py-2 text-xs hover:bg-slate-50 transition-colors ${
+                      currentLanguage === 'it-IT' ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-slate-700'
+                    }`}
+                  >
+                    Italiano
+                  </button>
+                </div>
+              )}
+            </div>
           )}
 
           {sttSupported && isListening && (

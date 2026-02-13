@@ -102,6 +102,7 @@ export function GuidedFormCompletion({
   const [transcriptAlternatives, setTranscriptAlternatives] = useState<string[]>([]);
   const [skippedFields, setSkippedFields] = useState<string[]>(initialSkippedFields);
   const [avatarModeStarted, setAvatarModeStarted] = useState(initialAvatarModeStarted);
+  const [currentLanguage, setCurrentLanguage] = useState<string>('en-US');
 
   const voiceManager = useRef(new VoiceManager());
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
@@ -553,6 +554,18 @@ export function GuidedFormCompletion({
     }, 1000);
   };
 
+  const handleLanguageChange = (language: string) => {
+    setCurrentLanguage(language);
+    voiceManager.current.setLanguage(language);
+
+    const languageName = language === 'it-IT' ? 'italiano' : 'English';
+    const message = language === 'it-IT'
+      ? 'Perfetto! Ora parlerò in italiano.'
+      : 'Great! I will now speak in English.';
+
+    addAvatarMessage(message);
+  };
+
   const saveDraft = async () => {
     const progress = calculateProgress(template, data);
 
@@ -716,7 +729,8 @@ export function GuidedFormCompletion({
               onSkip={handleSkip}
               sttSupported={stt}
               ttsSupported={tts}
-              currentText={lastAvatarMessage}
+              currentLanguage={currentLanguage}
+              onLanguageChange={handleLanguageChange}
             />
           </div>
 
