@@ -53,30 +53,47 @@ export class VoiceManager {
     const isItalian = this.currentLanguage.startsWith('it');
 
     if (isItalian) {
-      // Italian voice selection
+      // Italian voice selection - prioritize male voices
       const professionalItalianMaleVoices = [
-        'Google italiano',
-        'Microsoft Cosimo',
+        'Cosimo',
         'Diego',
         'Luca',
-        'Paolo'
+        'Paolo',
+        'Google italiano'
       ];
 
+      // First try: explicit male voices with professional names
       let selectedVoice = voices.find(voice => {
         const isItalianLang = voice.lang.startsWith('it');
-        const isMale = voice.name.toLowerCase().includes('male') ||
-                       professionalItalianMaleVoices.some(pv => voice.name.includes(pv));
+        const hasMaleInName = voice.name.toLowerCase().includes('male') && !voice.name.toLowerCase().includes('female');
         const notPremium = !voice.name.includes('Premium') && !voice.name.includes('Enhanced');
         const notRobotic = !voice.name.includes('eSpeak') && !voice.name.includes('Compact');
 
-        return isItalianLang && isMale && notPremium && notRobotic;
+        return isItalianLang && hasMaleInName && notPremium && notRobotic;
       });
 
+      // Second try: known male Italian voice names
       if (!selectedVoice) {
         selectedVoice = voices.find(voice => {
           const isItalianLang = voice.lang.startsWith('it');
+          const isMaleVoice = professionalItalianMaleVoices.some(pv => voice.name.includes(pv));
+          const notFemale = !voice.name.toLowerCase().includes('female');
           const notRobotic = !voice.name.includes('eSpeak') && !voice.name.includes('Compact');
-          return isItalianLang && notRobotic;
+
+          return isItalianLang && isMaleVoice && notFemale && notRobotic;
+        });
+      }
+
+      // Third try: any Italian voice that's explicitly NOT female
+      if (!selectedVoice) {
+        selectedVoice = voices.find(voice => {
+          const isItalianLang = voice.lang.startsWith('it');
+          const notFemale = !voice.name.toLowerCase().includes('female') &&
+                           !voice.name.includes('Alice') &&
+                           !voice.name.includes('Federica') &&
+                           !voice.name.includes('Elsa');
+          const notRobotic = !voice.name.includes('eSpeak') && !voice.name.includes('Compact');
+          return isItalianLang && notFemale && notRobotic;
         });
       }
 

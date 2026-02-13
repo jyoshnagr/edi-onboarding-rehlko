@@ -6,7 +6,8 @@ import { Chat } from './Chat';
 import { LiveForm } from './LiveForm'
 import { VoiceManager } from './lib/voiceUtils';
 import { calculateProgress, getNextMissingField, validateAllFields, extractValueFromResponse, parseAddressComponents, generateSummary } from './lib/formUtils';
-import { supabase } from '../intakeForms/lib/supabase'
+import { supabase } from '../intakeForms/lib/supabase';
+import { translate, translateFieldPrompt, Language } from './lib/translations';
 
 interface GuidedFormCompletionProps {
   template: FormTemplate;
@@ -102,7 +103,7 @@ export function GuidedFormCompletion({
   const [transcriptAlternatives, setTranscriptAlternatives] = useState<string[]>([]);
   const [skippedFields, setSkippedFields] = useState<string[]>(initialSkippedFields);
   const [avatarModeStarted, setAvatarModeStarted] = useState(initialAvatarModeStarted);
-  const [currentLanguage, setCurrentLanguage] = useState<string>('en-US');
+  const [currentLanguage, setCurrentLanguage] = useState<Language>('en-US');
 
   const voiceManager = useRef(new VoiceManager());
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
@@ -192,18 +193,20 @@ export function GuidedFormCompletion({
     });
 
     if (prepopulatedFields.length > 0) {
+      const quickReplies = [
+        translate(currentLanguage, 'looksGood'),
+        translate(currentLanguage, 'needToUpdate')
+      ];
+
       addAvatarMessage(
-        `Welcome! I'm RHELO, your virtual assistant. I've already filled in some information from your profile. Here's what I have:\n` +
-        prepopulatedFields.join('\n') +
-        `\n\nPlease confirm if these details are correct, or let me know if you'd like to update anything.`,
+        translate(currentLanguage, 'welcome', template.name, prepopulatedFields),
         undefined,
-        ['Looks good', 'Need to update something'],
+        quickReplies,
         shouldEnableVoice
       );
     } else {
       addAvatarMessage(
-        `Let's complete your ${template.name} form. I'll guide you through each field. ` +
-        `You can answer with voice or text, and edit any field at any time.`,
+        translate(currentLanguage, 'welcomeNoPrepopulated', template.name),
         undefined,
         undefined,
         shouldEnableVoice
@@ -230,7 +233,7 @@ export function GuidedFormCompletion({
 
     if (!nextField) {
       addAvatarMessage(
-        'Great! All required fields are complete. You can review and submit your form now.',
+        translate(currentLanguage, 'allComplete'),
         undefined
       );
       return;
@@ -242,7 +245,8 @@ export function GuidedFormCompletion({
       ? normalizeOptions(nextField.options).slice(0, 4).map((o) => o.label)
       : undefined;
 
-    addAvatarMessage(nextField.avatarPrompt, nextField.id, quickReplies);
+    const translatedPrompt = translateFieldPrompt(nextField.avatarPrompt, currentLanguage);
+    addAvatarMessage(translatedPrompt, nextField.id, quickReplies);
   };
 
   const handleFieldChange = (fieldId: string, value: string | string[]) => {
@@ -269,7 +273,7 @@ export function GuidedFormCompletion({
 
         setTimeout(() => {
           setAvatarStatus('idle');
-          addAvatarMessage('Got it, thank you!');
+          addAvatarMessage(translate(currentLanguage, 'gotIt'));
 
           setTimeout(() => {
             // Find next field using the updated data
@@ -279,7 +283,7 @@ export function GuidedFormCompletion({
 
             if (!nextField) {
               addAvatarMessage(
-                'Great! All required fields are complete. You can review and submit your form now.',
+                translate(currentLanguage, 'allComplete'),
                 undefined
               );
               return;
@@ -291,7 +295,8 @@ export function GuidedFormCompletion({
               ? normalizeOptions(nextField.options).slice(0, 4).map((o) => o.label)
               : undefined;
 
-            addAvatarMessage(nextField.avatarPrompt, nextField.id, quickReplies);
+            const translatedPrompt = translateFieldPrompt(nextField.avatarPrompt, currentLanguage);
+            addAvatarMessage(translatedPrompt, nextField.id, quickReplies);
           }, 1800);
         }, 1000);
       }
@@ -305,16 +310,20 @@ export function GuidedFormCompletion({
   const handleQuickReply = (reply: string) => {
     addUserMessage(reply);
 
-    if (reply === 'Looks good' || reply === 'Need to update something') {
+    const looksGoodText = translate(currentLanguage, 'looksGood');
+    const needToUpdateText = translate(currentLanguage, 'needToUpdate');
+
+    if (reply === looksGoodText || reply === 'Looks good' || reply === needToUpdateText || reply === 'Need to update something') {
       voiceManager.current.stopSpeaking();
       setAvatarStatus('thinking');
 
       setTimeout(() => {
         setAvatarStatus('idle');
+        const isLooksGood = reply === looksGoodText || reply === 'Looks good';
         addAvatarMessage(
-          reply === 'Looks good'
-            ? `Perfect! Now let's fill in the remaining fields. I'll guide you through each one.`
-            : `No problem! You can update any field on the right side. Once you're ready, I'll help with the remaining fields.`
+          isLooksGood
+            ? translate(currentLanguage, 'looksGoodResponse')
+            : translate(currentLanguage, 'needToUpdateResponse')
         );
 
         setTimeout(() => {
@@ -352,8 +361,9 @@ export function GuidedFormCompletion({
         ? normalizeOptions(field.options).slice(0, 4).map(o => o.label)
         : undefined;
 
+      const translatedPrompt = translateFieldPrompt(field.avatarPrompt, currentLanguage);
       addAvatarMessage(
-        `Let me help you with ${field.label}. ${field.avatarPrompt}`,
+        translate(currentLanguage, 'helpWith', field.label, translatedPrompt),
         fieldId,
         quickReplies
       );
@@ -406,7 +416,7 @@ export function GuidedFormCompletion({
         (error) => {
           console.error('Speech recognition error:', error);
           if (error !== 'no-speech' && error !== 'aborted') {
-            addAvatarMessage("I didn't catch that. Could you try again?");
+            addAvatarMessage(translate(currentLanguage, 'didntCatch'));
           }
           setIsListening(false);
           setAvatarStatus('idle');
@@ -529,11 +539,23 @@ export function GuidedFormCompletion({
         .find(f => f.id === currentFieldId);
 
       if (field) {
-        const rephrasedPrompts = [
-          `Could you provide your ${field.label.toLowerCase()}?`,
-          `What should I put for ${field.label.toLowerCase()}?`,
-          `Please tell me your ${field.label.toLowerCase()}.`,
-        ];
+        const labelLower = field.label.toLowerCase();
+        let rephrasedPrompts: string[];
+
+        if (currentLanguage === 'it-IT') {
+          rephrasedPrompts = [
+            `Potresti fornire il tuo ${labelLower}?`,
+            `Cosa devo inserire per ${labelLower}?`,
+            `Per favore dimmi il tuo ${labelLower}.`,
+          ];
+        } else {
+          rephrasedPrompts = [
+            `Could you provide your ${labelLower}?`,
+            `What should I put for ${labelLower}?`,
+            `Please tell me your ${labelLower}.`,
+          ];
+        }
+
         const randomPrompt = rephrasedPrompts[Math.floor(Math.random() * rephrasedPrompts.length)];
         addAvatarMessage(randomPrompt, currentFieldId);
       }
@@ -546,24 +568,19 @@ export function GuidedFormCompletion({
       setSkippedFields(prev => [...prev, currentFieldId]);
     }
 
-    addUserMessage('Skip for now');
-    addAvatarMessage('No problem, we can come back to this later.');
+    addUserMessage(translate(currentLanguage, 'skipForNow'));
+    addAvatarMessage(translate(currentLanguage, 'skipResponse'));
 
     setTimeout(() => {
       startNextField();
     }, 1000);
   };
 
-  const handleLanguageChange = (language: string) => {
+  const handleLanguageChange = (language: Language) => {
     setCurrentLanguage(language);
     voiceManager.current.setLanguage(language);
 
-    const languageName = language === 'it-IT' ? 'italiano' : 'English';
-    const message = language === 'it-IT'
-      ? 'Perfetto! Ora parlerò in italiano.'
-      : 'Great! I will now speak in English.';
-
-    addAvatarMessage(message);
+    addAvatarMessage(translate(language, 'languageChanged'));
   };
 
   const saveDraft = async () => {
@@ -613,10 +630,7 @@ export function GuidedFormCompletion({
     setValidationErrors(errors);
 
     if (errors.length > 0) {
-      addAvatarMessage(
-        `I found ${errors.length} issue${errors.length !== 1 ? 's' : ''} that need to be fixed before submitting. ` +
-        `Please review the highlighted fields.`
-      );
+      addAvatarMessage(translate(currentLanguage, 'validationError', errors.length));
     } else {
       onReview(data, chatMessages, skippedFields, avatarModeStarted);
     }
@@ -627,10 +641,7 @@ export function GuidedFormCompletion({
     setValidationErrors(errors);
 
     if (errors.length > 0) {
-      addAvatarMessage(
-        `I found ${errors.length} issue${errors.length !== 1 ? 's' : ''} that need to be fixed before submitting. ` +
-        `Please review the highlighted fields.`
-      );
+      addAvatarMessage(translate(currentLanguage, 'validationError', errors.length));
       return;
     }
 
@@ -652,7 +663,7 @@ export function GuidedFormCompletion({
         onSubmit(summary, data, template);
       } catch (error) {
         console.error('Error submitting form:', error);
-        addAvatarMessage('There was an error submitting your form. Please try again.');
+        addAvatarMessage(translate(currentLanguage, 'submitError'));
       }
     }
   };
