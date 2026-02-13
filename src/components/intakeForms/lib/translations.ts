@@ -16,7 +16,10 @@ export const translations = {
     validationError: (count: number) =>
       `I found ${count} issue${count !== 1 ? 's' : ''} that need to be fixed before submitting. Please review the highlighted fields.`,
     submitError: 'There was an error submitting your form. Please try again.',
-    helpWith: (label: string, prompt: string) => `Let me help you with ${label}. ${prompt}`,
+    helpWith: (label: string, prompt: string) => {
+      const promptText = prompt ? ` ${prompt}` : '';
+      return `Let me help you with ${label}.${promptText}`;
+    },
     languageChanged: 'Great! I will now speak in English.',
   },
   'it-IT': {
@@ -36,7 +39,10 @@ export const translations = {
     validationError: (count: number) =>
       `Ho trovato ${count} problema${count !== 1 ? 'i' : ''} da correggere prima dell'invio. Rivedi i campi evidenziati.`,
     submitError: 'Si è verificato un errore durante l\'invio del modulo. Riprova.',
-    helpWith: (label: string, prompt: string) => `Lascia che ti aiuti con ${label}. ${prompt}`,
+    helpWith: (label: string, prompt: string) => {
+      const promptText = prompt ? ` ${prompt}` : '';
+      return `Lascia che ti aiuti con ${label}.${promptText}`;
+    },
     languageChanged: 'Perfetto! Ora parlerò in italiano.',
   },
 };
@@ -59,6 +65,11 @@ export function translate(
 }
 
 export function translateFieldPrompt(prompt: string, language: Language): string {
+  // Handle undefined or empty prompts
+  if (!prompt || prompt.trim() === '') {
+    return '';
+  }
+
   if (language === 'en-US') {
     return prompt;
   }

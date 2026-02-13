@@ -245,7 +245,14 @@ export function GuidedFormCompletion({
       ? normalizeOptions(nextField.options).slice(0, 4).map((o) => o.label)
       : undefined;
 
-    const translatedPrompt = translateFieldPrompt(nextField.avatarPrompt, currentLanguage);
+    // Provide fallback prompt if avatarPrompt is missing
+    const defaultPrompt = currentLanguage === 'it-IT'
+      ? `Qual è il tuo ${nextField.label.toLowerCase()}?`
+      : `What is your ${nextField.label.toLowerCase()}?`;
+
+    const promptToTranslate = nextField.avatarPrompt || defaultPrompt;
+    const translatedPrompt = translateFieldPrompt(promptToTranslate, currentLanguage);
+
     addAvatarMessage(translatedPrompt, nextField.id, quickReplies);
   };
 
@@ -295,7 +302,14 @@ export function GuidedFormCompletion({
               ? normalizeOptions(nextField.options).slice(0, 4).map((o) => o.label)
               : undefined;
 
-            const translatedPrompt = translateFieldPrompt(nextField.avatarPrompt, currentLanguage);
+            // Provide fallback prompt if avatarPrompt is missing
+            const defaultPrompt = currentLanguage === 'it-IT'
+              ? `Qual è il tuo ${nextField.label.toLowerCase()}?`
+              : `What is your ${nextField.label.toLowerCase()}?`;
+
+            const promptToTranslate = nextField.avatarPrompt || defaultPrompt;
+            const translatedPrompt = translateFieldPrompt(promptToTranslate, currentLanguage);
+
             addAvatarMessage(translatedPrompt, nextField.id, quickReplies);
           }, 1800);
         }, 1000);
@@ -361,7 +375,14 @@ export function GuidedFormCompletion({
         ? normalizeOptions(field.options).slice(0, 4).map(o => o.label)
         : undefined;
 
-      const translatedPrompt = translateFieldPrompt(field.avatarPrompt, currentLanguage);
+      // Provide fallback prompt if avatarPrompt is missing
+      const defaultPrompt = currentLanguage === 'it-IT'
+        ? `Qual è il tuo ${field.label.toLowerCase()}?`
+        : `What is your ${field.label.toLowerCase()}?`;
+
+      const promptToTranslate = field.avatarPrompt || defaultPrompt;
+      const translatedPrompt = translateFieldPrompt(promptToTranslate, currentLanguage);
+
       addAvatarMessage(
         translate(currentLanguage, 'helpWith', field.label, translatedPrompt),
         fieldId,
